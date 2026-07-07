@@ -1,0 +1,53 @@
+name: smart-waste-classification
+
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+
+  # Python
+  - python=3.11 (miniconda3)
+
+  # Notebook
+  - jupyterlab
+  - notebook
+  - ipykernel
+
+  # Scientific Computing
+  - numpy
+  - pandas
+  - scipy
+
+  # Visualization
+  - matplotlib
+  - seaborn
+
+  # Machine Learning
+  - scikit-learn
+
+  # Image Processing
+  - pillow
+  - opencv
+
+  # Utilities
+  - tqdm
+  - pyyaml
+
+  # PyTorch
+  - pytorch
+  - torchvision
+  - torchaudio
+
+  # Pip packages
+  - pip
+
+  - pip:
+
+      - albumentations
+      - timm
+      - torchsummary
+      - torchmetrics
+      - tensorboard
+      - kaggle
