@@ -1,4 +1,86 @@
-epochs: 30
-batch_size: 32
-learning_rate: 0.001
-optimizer: Adam
+# ============================================================
+# BASELINE CNN — EXPERIMENT 01
+# SATRIA DATA 2026 — Big Data Challenge
+# ============================================================
+
+experiment:
+  name: "baseline_cnn_exp01"
+  model: "custom_cnn"
+  description: "CNN Sederhana sebagai baseline untuk klasifikasi sampah"
+  seed: 42
+
+# --- Dataset ---
+data:
+  raw_dir: "data/raw/BDC2026"
+  train_subdir: "train"
+  test_subdir: "test"
+  class_names:
+    - "Recyclable"
+    - "Electronic"
+    - "Organic"
+  num_classes: 3
+
+# --- Preprocessing ---
+preprocessing:
+  image_size: 224           # Input size CNN (px)
+  resize_to: 256            # Resize sebelum CenterCrop (px)
+  channels: 3               # RGB
+  normalize:
+    mean: [0.485, 0.456, 0.406]   # ImageNet statistics
+    std:  [0.229, 0.224, 0.225]
+
+# --- Augmentation (Training Only) ---
+augmentation:
+  random_resized_crop:
+    enabled: true
+    size: 224
+    scale: [0.8, 1.0]
+  horizontal_flip:
+    enabled: true
+    p: 0.5
+  rotation:
+    enabled: true
+    degrees: 15
+  color_jitter:
+    enabled: true
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.2
+    hue: 0.05
+
+# --- Dataset Split ---
+split:
+  strategy: "stratified"
+  train_ratio: 0.80
+  val_ratio: 0.20
+  shuffle: true
+
+# --- DataLoader ---
+dataloader:
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  train_shuffle: true
+  val_shuffle: false
+
+# --- Training ---
+training:
+  epochs: 30
+  optimizer: "AdamW"
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  scheduler: "ReduceLROnPlateau"
+  scheduler_mode: "max"          # monitor val_macro_f1 (higher is better)
+  scheduler_factor: 0.5          # LR dikali 0.5 saat plateau
+  scheduler_patience: 3          # tunggu 3 epoch sebelum reduce
+  scheduler_min_lr: 0.00001
+  early_stopping_patience: 5
+  early_stopping_monitor: "val_macro_f1"
+
+# --- Output ---
+output:
+  figures_dir: "outputs/figures"
+  reports_dir: "outputs/reports"
+  checkpoints_dir: "outputs/checkpoints"
+  logs_dir: "outputs/logs"
+  submission_dir: "outputs/submission"

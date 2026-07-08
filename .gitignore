@@ -1,2 +1,8 @@
 # Data raw
 data/raw/
+
+# Python Cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.pth

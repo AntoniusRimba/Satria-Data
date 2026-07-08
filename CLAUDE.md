@@ -495,3 +495,24 @@ Model Comparison
 ↓
 
 Final Submission
+
+---------------------------------------------------
+
+# PROJECT ARCHITECTURE
+
+The project follows a modular architecture.
+
+All business logic, machine learning pipeline, and reusable code MUST be implemented inside the `src/` directory.
+
+Jupyter notebooks are used ONLY for:
+
+- Research documentation
+- Markdown explanation
+- Running experiments
+- Calling functions from `src/`
+- Displaying visualizations
+- Presenting results
+
+Never place large implementations directly inside notebooks.
+
+Notebook code should remain lightweight and focus on orchestrating the pipeline rather than implementing it.

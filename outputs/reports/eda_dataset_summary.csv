@@ -1,0 +1,4 @@
+class_label,class_name,image_count,folder_path
+0_Recyclable,Recyclable,9999,D:\Data Analysis\Smart Waste Classification\data\raw\BDC2026\train\0_Recyclable
+1_Electronic,Electronic,3958,D:\Data Analysis\Smart Waste Classification\data\raw\BDC2026\train\1_Electronic
+2_Organic,Organic,12567,D:\Data Analysis\Smart Waste Classification\data\raw\BDC2026\train\2_Organic
