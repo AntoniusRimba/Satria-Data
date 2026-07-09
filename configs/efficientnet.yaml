@@ -1,4 +1,131 @@
-epochs: 30
-batch_size: 32
-learning_rate: 0.001
-optimizer: Adam
+# ============================================================
+# EFFICIENTNET-B0 — EXPERIMENT 01 (Feature Extraction)
+# SATRIA DATA 2026 — Big Data Challenge
+# ============================================================
+# Strategi : Feature Extraction (Frozen Backbone)
+# Backbone  : EfficientNet-B0 pretrained on ImageNet
+# Head      : Custom Linear classifier (3 classes)
+# ============================================================
+
+experiment:
+  name: "efficientnet_b0_exp01"
+  model: "efficientnet_b0"
+  description: "Transfer Learning EfficientNet-B0 — Experiment 01 — Feature Extraction"
+  strategy: "feature_extraction"   # backbone di-freeze, hanya head yang dilatih
+  seed: 42
+
+# --- Dataset ---
+data:
+  raw_dir: "data/raw/BDC2026"
+  train_subdir: "train"
+  test_subdir: "test"
+  class_names:
+    - "Recyclable"
+    - "Electronic"
+    - "Organic"
+  num_classes: 3
+
+# --- Preprocessing ---
+# EfficientNet-B0 pretrained ImageNet mengharuskan:
+#   - Input size   : 224×224  (default EfficientNet-B0, sama dengan ResNet50)
+#   - Resize awal  : 256      (untuk CenterCrop deterministik di val/test)
+#   - Normalisasi  : ImageNet mean & std (WAJIB untuk pretrained backbone)
+preprocessing:
+  image_size: 224           # Input size EfficientNet-B0 (px) — standar ImageNet
+  resize_to: 256            # Resize intermediate sebelum CenterCrop (px)
+  channels: 3               # RGB — konversi otomatis di WasteDataset
+  normalize:
+    mean: [0.485, 0.456, 0.406]   # ImageNet mean (R, G, B)
+    std:  [0.229, 0.224, 0.225]   # ImageNet std  (R, G, B)
+
+# --- Augmentation (Training Only) ---
+# Konsisten dengan ResNet50 untuk perbandingan yang fair.
+# Konservatif: menghindari distorsi yang mengubah semantik objek sampah.
+# Tidak menggunakan vertical flip (sampah memiliki orientasi vertikal alami).
+augmentation:
+  random_resized_crop:
+    enabled: true
+    size: 224
+    scale: [0.8, 1.0]       # Crop minimal 80% area — hindari cropping terlalu agresif
+  horizontal_flip:
+    enabled: true
+    p: 0.5                  # 50% probabilitas flip horizontal
+  rotation:
+    enabled: true
+    degrees: 15             # ±15° — mencerminkan variasi sudut kamera nyata
+  color_jitter:
+    enabled: true
+    brightness: 0.3         # Variasi kondisi pencahayaan
+    contrast: 0.3           # Variasi kontras
+    saturation: 0.2         # Variasi saturasi (konservatif)
+    hue: 0.05               # Variasi hue sangat kecil — jangan ubah warna objek
+
+# --- Dataset Split ---
+# Stratified split: mempertahankan distribusi kelas di train dan val.
+# KRITIS untuk Macro F1 Score yang adil.
+# Menggunakan hasil split yang sama dengan eksperimen sebelumnya (seed=42).
+split:
+  strategy: "stratified"
+  train_ratio: 0.80         # 80% training — ~21,219 gambar
+  val_ratio: 0.20           # 20% validation — ~5,305 gambar
+  shuffle: true
+
+# --- DataLoader ---
+# WeightedRandomSampler diaktifkan untuk menangani class imbalance.
+# Electronic (~14.9%) jauh lebih sedikit dari Organic (~47.4%).
+dataloader:
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  train_shuffle: true
+  val_shuffle: false
+  use_weighted_sampler: true    # Aktif untuk mengatasi imbalance
+
+# --- Model Architecture (EfficientNet-B0) ---
+# EfficientNet-B0 menggunakan Compound Scaling (phi=1.0):
+#   - Width multiplier  : 1.0
+#   - Depth multiplier  : 1.0
+#   - Resolution        : 224px
+#   - Total params      : ~5.3 Juta (jauh lebih efisien dari ResNet50 ~23.5M)
+#   - MBConv blocks     : 16 MBConv (Inverted Residual + Depthwise Separable Conv)
+model:
+  backbone: "efficientnet_b0"
+  pretrained: true
+  weights: "IMAGENET1K_V1"      # Gunakan pretrained weights ImageNet resmi PyTorch
+  freeze_backbone: true         # Feature Extraction: backbone di-freeze
+  unfreeze_layers: []           # Tidak ada layer yang di-unfreeze (Exp01)
+  classifier_head:
+    # EfficientNet-B0 memiliki output backbone 1280-dim (berbeda dari ResNet50 2048-dim)
+    # Head: Linear(1280 → 3) dengan Dropout untuk regularisasi
+    dropout: 0.4               # Sedikit lebih kecil dari ResNet50 (0.5) karena
+                                # EfficientNet-B0 sudah memiliki regularisasi internal
+    hidden_units: 0            # Langsung ke output layer (tidak ada hidden layer tambahan)
+    output_units: 3            # Sesuai jumlah kelas BDC
+
+# --- Training ---
+# LR relatif besar karena hanya melatih head (backbone di-freeze).
+# Konsisten dengan ResNet50 Exp01 untuk perbandingan yang adil.
+training:
+  epochs: 20                    # Konsisten dengan ResNet50 Exp01 untuk perbandingan fair
+  optimizer: "Adam"             # Adam ideal untuk melatih head dengan LR konstan
+  learning_rate: 0.001          # LR relatif besar — hanya head yang dilatih
+  weight_decay: 0.0001          # Regularisasi L2
+  scheduler: "ReduceLROnPlateau"
+  scheduler_mode: "max"         # Monitor val_macro_f1 (higher is better)
+  scheduler_factor: 0.5         # Kurangi LR menjadi 50% saat plateau
+  scheduler_patience: 3         # Tunggu 3 epoch sebelum reduce LR
+  scheduler_min_lr: 0.00001
+  early_stopping_patience: 5    # Stop jika val_macro_f1 tidak meningkat 5 epoch
+  early_stopping_monitor: "val_macro_f1"
+  loss_function: "CrossEntropyLoss"
+  use_class_weights: false      # WeightedRandomSampler sudah menangani imbalance
+
+# --- Output Paths ---
+output:
+  experiment_dir: "experiments/04_efficientnet/exp_01"
+  figures_dir: "outputs/figures"
+  reports_dir: "outputs/reports"
+  checkpoints_dir: "outputs/checkpoints"
+  logs_dir: "outputs/logs"
+  submission_dir: "outputs/submission"
+  artifacts_dir: "outputs/artifacts"
