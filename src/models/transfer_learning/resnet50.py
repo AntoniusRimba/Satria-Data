@@ -12,7 +12,8 @@ Modul ini membungkus torchvision.models.resnet50 dengan fitur:
 
 import torch
 import torch.nn as nn
-from torchvision.models import resnet50, ResNet50_Weights
+from torchvision.models import resnet50
+from torchvision.models.resnet import ResNet50_Weights
 from typing import List, Dict, Any
 
 class ResNet50WasteClassifier(nn.Module):
