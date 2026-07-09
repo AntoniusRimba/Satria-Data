@@ -24,6 +24,7 @@ import logging
 import csv
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from tqdm.auto import tqdm
 
 import torch
 import torch.nn as nn
@@ -69,7 +70,8 @@ def train_one_epoch(
     all_labels   = []
     n_batches    = len(loader)
 
-    for batch_idx, (images, labels) in enumerate(loader):
+    pbar = tqdm(loader, desc=f"Train Epoch {epoch}", leave=False, dynamic_ncols=True)
+    for images, labels in pbar:
         images = images.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
 
@@ -87,13 +89,8 @@ def train_one_epoch(
         preds = logits.argmax(dim=1).cpu().numpy()
         all_preds.extend(preds)
         all_labels.extend(labels.cpu().numpy())
-
-        # Log setiap 50 batch
-        if (batch_idx + 1) % 50 == 0 or (batch_idx + 1) == n_batches:
-            logger.info(
-                f"  [Epoch {epoch}] Batch {batch_idx+1}/{n_batches} | "
-                f"Loss: {loss.item():.4f}"
-            )
+        
+        pbar.set_postfix({'loss': f"{loss.item():.4f}"})
 
     avg_loss  = running_loss / n_batches
     avg_acc   = accuracy_score(all_labels, all_preds)
@@ -134,7 +131,7 @@ def validate_one_epoch(
     n_batches    = len(loader)
 
     with torch.no_grad():
-        for images, labels in loader:
+        for images, labels in tqdm(loader, desc=f"Val Epoch {epoch}", leave=False, dynamic_ncols=True):
             images = images.to(device, non_blocking=True)
             labels = labels.to(device, non_blocking=True)
 
@@ -235,7 +232,6 @@ class Trainer:
             factor=train_cfg['scheduler_factor'],
             patience=train_cfg['scheduler_patience'],
             min_lr=train_cfg['scheduler_min_lr'],
-            verbose=True,
         )
 
         # --- Early Stopping ---

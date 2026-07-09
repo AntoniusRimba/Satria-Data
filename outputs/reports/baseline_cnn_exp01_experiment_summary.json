@@ -1,0 +1,11 @@
+{
+  "experiment": "baseline_cnn_exp01",
+  "total_epochs_trained": 1,
+  "total_time_min": 0.03,
+  "best_epoch": 1,
+  "best_val_macro_f1": 0.2222,
+  "stopped_early": false,
+  "final_train_loss": 1.605804,
+  "final_val_loss": 1.072273,
+  "final_val_f1": 0.222222
+}

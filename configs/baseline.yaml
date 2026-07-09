@@ -58,7 +58,7 @@ split:
 # --- DataLoader ---
 dataloader:
   batch_size: 32
-  num_workers: 4
+  num_workers: 0
   pin_memory: true
   train_shuffle: true
   val_shuffle: false

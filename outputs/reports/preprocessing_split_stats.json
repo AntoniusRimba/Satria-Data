@@ -1,0 +1,19 @@
+{
+  "total": 26524,
+  "train": {
+    "count": 21219,
+    "distribution": {
+      "Organic": 10054,
+      "Recyclable": 7999,
+      "Electronic": 3166
+    }
+  },
+  "val": {
+    "count": 5305,
+    "distribution": {
+      "Organic": 2513,
+      "Recyclable": 2000,
+      "Electronic": 792
+    }
+  }
+}

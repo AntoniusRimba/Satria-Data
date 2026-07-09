@@ -1,5 +1,8 @@
-# Data raw
-data/raw/
+# Data folder
+data/
+
+# Colab Notebook
+CNN_BASELINE.ipynb
 
 # Python Cache
 __pycache__/
