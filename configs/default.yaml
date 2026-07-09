@@ -1,5 +1,0 @@
-seed: 42
-batch_size: 32
-image_size: 224
-num_workers: 4
-device: cuda
