@@ -8,10 +8,10 @@
 # ============================================================
 
 experiment:
-  name: "efficientnet_b0_exp01"
+  name: "efficientnet_b0_exp03"
   model: "efficientnet_b0"
-  description: "Transfer Learning EfficientNet-B0 — Experiment 01 — Feature Extraction"
-  strategy: "feature_extraction"   # backbone di-freeze, hanya head yang dilatih
+  description: "Transfer Learning EfficientNet-B0 — Experiment 03 - Final Performance Optimization"
+  strategy: "Final Performance Optimization"
   seed: 42
 
 # --- Dataset ---
@@ -74,7 +74,7 @@ split:
 # WeightedRandomSampler diaktifkan untuk menangani class imbalance.
 # Electronic (~14.9%) jauh lebih sedikit dari Organic (~47.4%).
 dataloader:
-  batch_size: 32
+  batch_size: 64
   num_workers: 4
   pin_memory: true
   train_shuffle: true
@@ -106,9 +106,9 @@ model:
 # LR relatif besar karena hanya melatih head (backbone di-freeze).
 # Konsisten dengan ResNet50 Exp01 untuk perbandingan yang adil.
 training:
-  epochs: 20                    # Konsisten dengan ResNet50 Exp01 untuk perbandingan fair
+  epochs: 40                    # Konsisten dengan ResNet50 Exp03 untuk perbandingan fair
   optimizer: "Adam"             # Adam ideal untuk melatih head dengan LR konstan
-  learning_rate: 0.001          # LR relatif besar — hanya head yang dilatih
+  learning_rate: 0.0015         # LR relatif besar — hanya head yang dilatih
   weight_decay: 0.0001          # Regularisasi L2
   scheduler: "ReduceLROnPlateau"
   scheduler_mode: "max"         # Monitor val_macro_f1 (higher is better)
@@ -122,7 +122,7 @@ training:
 
 # --- Output Paths ---
 output:
-  experiment_dir: "experiments/04_efficientnet/exp_01"
+  experiment_dir: "experiments/04_efficientnet/exp_03"
   figures_dir: "outputs/figures"
   reports_dir: "outputs/reports"
   checkpoints_dir: "outputs/checkpoints"
