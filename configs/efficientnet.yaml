@@ -115,7 +115,7 @@ training:
   scheduler_factor: 0.5         # Kurangi LR menjadi 50% saat plateau
   scheduler_patience: 3         # Tunggu 3 epoch sebelum reduce LR
   scheduler_min_lr: 0.00001
-  early_stopping_patience: 5    # Stop jika val_macro_f1 tidak meningkat 5 epoch
+  early_stopping_patience: 11    # Stop jika val_macro_f1 tidak meningkat 5 epoch
   early_stopping_monitor: "val_macro_f1"
   loss_function: "CrossEntropyLoss"
   use_class_weights: false      # WeightedRandomSampler sudah menangani imbalance
